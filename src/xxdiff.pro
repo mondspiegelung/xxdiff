@@ -213,7 +213,6 @@ HEADERS = \
 	main.h \
 	overview.h \
 	resParser.h \
-	resParser_lex.h \
 	resources.h \
 	resources.inline.h \
 	accelUtil.h \
