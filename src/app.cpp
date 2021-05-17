@@ -319,61 +319,61 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
          // onRedoDiff().
          if ( _cmdline._unmerge == false && _cmdline._single == false ) {
             for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-               std::auto_ptr<XxBuffer> newbuf(
+               std::unique_ptr<XxBuffer> newbuf(
                   readFile( ii,
                             filenames[ii],
                             displayFilenames[ii],
                             fileInfos[ii],
                             isTemporary[ii] )
                );
-               _files[ii] = newbuf;
+               _files[ii] = std::move(newbuf);
             }
          }
          else if ( _cmdline._single == true ) {
 
             // Read the one single file.
-            std::auto_ptr<XxBuffer> newbuf(
+            std::unique_ptr<XxBuffer> newbuf(
                readFile( 0,
                          filenames[0],
                          displayFilenames[0],
                          fileInfos[0],
                          isTemporary[0] )
             );
-            _files[0] = newbuf;
+            _files[0] = std::move(newbuf);
 
             // Make an empty buffer.
-            std::auto_ptr<XxBuffer> emptybuf(
+            std::unique_ptr<XxBuffer> emptybuf(
                new XxBuffer( false, QString("/dev/null"), QString("(empty)") )
             );
-            _files[1] = emptybuf;
+            _files[1] = std::move(emptybuf);
          }
          else {
-            std::auto_ptr<XxBuffer> newbuf(
+            std::unique_ptr<XxBuffer> newbuf(
                readFile( 0,
                          filenames[0],
                          displayFilenames[0],
                          fileInfos[0],
                          isTemporary[0] )
             );
-            _files[0] = newbuf;
+            _files[0] = std::move(newbuf);
 
             // Make a proxy for the other buffer.
-            std::auto_ptr<XxBuffer> newbuf2(
+            std::unique_ptr<XxBuffer> newbuf2(
                new XxBuffer(
                   (*_files[0]), filenames[0], displayFilenames[0], fileInfos[0]
                )
             );
-            _files[1] = newbuf2;
+            _files[1] = std::move(newbuf2);
 
             if ( _cmdline._unmergeNbFiles == 3 ) {
                // Make a proxy for the other buffer.
-               std::auto_ptr<XxBuffer> newbuf2(
+               std::unique_ptr<XxBuffer> newbuf2(
                   new XxBuffer(
                      (*_files[0]), filenames[0],
                      displayFilenames[0], fileInfos[0]
                   )
                );
-               _files[2] = newbuf2;
+               _files[2] = std::move(newbuf2);
             }
          }
       }
@@ -2026,7 +2026,7 @@ void XxApp::createMenus()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxBuffer> XxApp::readFile(
+std::unique_ptr<XxBuffer> XxApp::readFile(
    const XxFno      no,
    const QString&   filename,
    const QString&   displayFilename,
@@ -2040,20 +2040,20 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
    //
    // Read in the file.
    //
-   std::auto_ptr<XxBuffer> newbuf;
+   std::unique_ptr<XxBuffer> newbuf;
 
    {
       if ( _filesAreDirectories &&
            _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
          // Assign an empty buffer. The directory diffs builder will fill it in
          // with whatever contents are read from directory diffs command output.
-         std::auto_ptr<XxBuffer> tmp(
+         std::unique_ptr<XxBuffer> tmp(
             new XxBuffer( false, filename, displayFilename, _newlineChar )
          );
-         newbuf = tmp;
+         newbuf = std::move(tmp);
       }
       else {
-         std::auto_ptr<XxBuffer> tmp(
+         std::unique_ptr<XxBuffer> tmp(
             new XxBuffer(
                filename,
                displayFilename,
@@ -2069,7 +2069,7 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
             tmp->makeTemporary();
          }
 
-         newbuf = tmp;
+         newbuf = std::move(tmp);
       }
    }
 
@@ -2099,19 +2099,19 @@ bool XxApp::processDiff()
    // If this is a single, create the diffs directly without running anything
    // special.
    //
-   std::auto_ptr<XxBuilder> builder;
+   std::unique_ptr<XxBuilder> builder;
    if ( _cmdline._single == true ) {
 
       XxBuilderSingle* builderSingle = new XxBuilderSingle;
-      std::auto_ptr<XxBuilder> builderTmp( builderSingle );
-      builder = builderTmp;
+      std::unique_ptr<XxBuilder> builderTmp( builderSingle );
+      builder = std::move(builderTmp);
       try {
 
          QString leftName, rightName;
-         std::auto_ptr<XxDiffs> tmp(
+         std::unique_ptr<XxDiffs> tmp(
             builderSingle->process( *(_files[0]) )
          );
-         _diffs = tmp;
+         _diffs = std::move(tmp);
          XX_ASSERT( _diffs.get() != 0 );
       }
       catch ( const XxError& ex ) {
@@ -2130,26 +2130,26 @@ bool XxApp::processDiff()
    else if ( _cmdline._unmerge == true ) {
 
       XxBuilderUnmerge* builderUnmerge = new XxBuilderUnmerge;
-      std::auto_ptr<XxBuilder> builderTmp( builderUnmerge );
-      builder = builderTmp;
+      std::unique_ptr<XxBuilder> builderTmp( builderUnmerge );
+      builder = std::move(builderTmp);
       try {
 
          QString leftName, middleName, rightName;
          if ( _cmdline._unmergeNbFiles == 2 ) {
-            std::auto_ptr<XxDiffs> tmp(
+            std::unique_ptr<XxDiffs> tmp(
                builderUnmerge->process(
                   *(_files[0]), _resources, leftName, rightName
                )
             );
-            _diffs = tmp;
+            _diffs = std::move(tmp);
          }
          else {
-            std::auto_ptr<XxDiffs> tmp(
+            std::unique_ptr<XxDiffs> tmp(
                builderUnmerge->process(
                   *(_files[0]), _resources, leftName, middleName, rightName
                )
             );
-            _diffs = tmp;
+            _diffs = std::move(tmp);
          }
          XX_ASSERT( _diffs.get() != 0 );
 
@@ -2202,17 +2202,17 @@ bool XxApp::processDiff()
          XxBuilderFiles2* filesBuilder = new XxBuilderFiles2(
             _resources->getBoolOpt( BOOL_USE_INTERNAL_DIFF )
          );
-         std::auto_ptr<XxBuilder> builderTmp( filesBuilder );
-         builder = builderTmp;
+         std::unique_ptr<XxBuilder> builderTmp( filesBuilder );
+         builder = std::move(builderTmp);
          try {
-            std::auto_ptr<XxDiffs> tmp(
+            std::unique_ptr<XxDiffs> tmp(
                filesBuilder->process(
                   _resources->getCommand( CMD_DIFF_FILES_2 ),
                   *_files[0],
                   *_files[1]
                )
             );
-            _diffs = tmp;
+            _diffs = std::move(tmp);
             XX_ASSERT( _diffs.get() != 0 );
          }
          catch ( const XxError& ex ) {
@@ -2231,10 +2231,10 @@ bool XxApp::processDiff()
       }
       else if ( _nbFiles == 3 ) {
          XxBuilderFiles3* filesBuilder = new XxBuilderFiles3;
-         std::auto_ptr<XxBuilder> builderTmp( filesBuilder );
-         builder = builderTmp;
+         std::unique_ptr<XxBuilder> builderTmp( filesBuilder );
+         builder = std::move(builderTmp);
          try {
-            std::auto_ptr<XxDiffs> tmp(
+            std::unique_ptr<XxDiffs> tmp(
                filesBuilder->process(
                   _resources->getCommand( CMD_DIFF_FILES_3 ),
                   *_files[0],
@@ -2242,7 +2242,7 @@ bool XxApp::processDiff()
                   *_files[2]
                )
             );
-            _diffs = tmp;
+            _diffs = std::move(tmp);
             XX_ASSERT( _diffs.get() != 0 );
          }
          catch ( const XxError& ex ) {
@@ -2278,8 +2278,8 @@ bool XxApp::processDiff()
          _resources->getBoolOpt( BOOL_DIRDIFF_RECURSIVE ),
          _resources->getBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES )
       );
-      std::auto_ptr<XxBuilder> builderTmp( dirsBuilder );
-      builder = builderTmp;
+      std::unique_ptr<XxBuilder> builderTmp( dirsBuilder );
+      builder = std::move(builderTmp);
       QByteArray dirdiff_command;
       try {
          if ( _resources->getBoolOpt( BOOL_DIRDIFF_RECURSIVE ) ) {
@@ -2292,10 +2292,10 @@ bool XxApp::processDiff()
                CMD_DIFF_DIRECTORIES
             ).toLocal8Bit();
          }
-         std::auto_ptr<XxDiffs> tmp(
+         std::unique_ptr<XxDiffs> tmp(
             dirsBuilder->process( dirdiff_command.constData(), *_files[0], *_files[1] )
          );
-         _diffs = tmp;
+         _diffs = std::move(tmp);
          XX_ASSERT( _diffs.get() != 0 );
       }
       catch ( const XxError& ex ) {
@@ -2768,11 +2768,11 @@ void XxApp::openFile( const XxFno no )
       }
 
       QFileInfo fileInfo( f );
-      std::auto_ptr<XxBuffer> newbuf(
+      std::unique_ptr<XxBuffer> newbuf(
          readFile( no, f, f, fileInfo, false )
       );
       if ( newbuf.get() != 0 ) {
-         _files[no] = newbuf;
+         _files[no] = std::move(newbuf);
 
          bool succ = processDiff();
 
@@ -2858,14 +2858,14 @@ void XxApp::onRedoDiff()
                   // might have changed.
                   QFileInfo fileInfo( buffer.getName() );
 
-                  std::auto_ptr<XxBuffer> newbuf(
+                  std::unique_ptr<XxBuffer> newbuf(
                      readFile( ii,
                                buffer.getName(),
                                buffer.getDisplayName(),
                                fileInfo,
                                buffer.isTemporary() )
                   );
-                  _files[ii] = newbuf;
+                  _files[ii] = std::move(newbuf);
                }
             }
 
@@ -2875,26 +2875,26 @@ void XxApp::onRedoDiff()
          else if ( _cmdline._single == true ) {
 
             // Read the one single file.
-            std::auto_ptr<XxBuffer> newbuf(
+            std::unique_ptr<XxBuffer> newbuf(
                readFile( 0,
                          _files[0]->getName(),
                          _files[0]->getDisplayName(),
                          _files[0]->getFileInfo(),
                          _files[0]->isTemporary() )
             );
-            _files[0] = newbuf;
+            _files[0] = std::move(newbuf);
 
             // Make an empty buffer.
-            std::auto_ptr<XxBuffer> emptybuf(
+            std::unique_ptr<XxBuffer> emptybuf(
                new XxBuffer( false, QString("/dev/null"), QString("(empty)") )
             );
-            _files[1] = emptybuf;
+            _files[1] = std::move(emptybuf);
 
          }
          else { // unmerge
             const XxBuffer& buffer1 = *(_files[0].get());
             if ( buffer1.isTemporary() == false ) {
-               std::auto_ptr<XxBuffer> newbuf(
+               std::unique_ptr<XxBuffer> newbuf(
                   readFile( 0,
                             _files[0]->getName(),
                             _files[0]->getDisplayName(),
@@ -2902,26 +2902,26 @@ void XxApp::onRedoDiff()
                             _files[0]->getFileInfo(),
                             _files[0]->isTemporary() )
                );
-               _files[0] = newbuf;
+               _files[0] = std::move(newbuf);
 
                // Make a proxy for the other buffer.
-               std::auto_ptr<XxBuffer> newbuf2(
+               std::unique_ptr<XxBuffer> newbuf2(
                   new XxBuffer( (*_files[0]),
                                 _files[0]->getName(),
                                 _files[0]->getDisplayName(),
                                 _files[0]->getFileInfo() )
                );
-               _files[1] = newbuf2;
+               _files[1] = std::move(newbuf2);
 
                if ( _cmdline._unmergeNbFiles == 3 ) {
                   // Make a proxy for the other buffer.
-                  std::auto_ptr<XxBuffer> newbuf2(
+                  std::unique_ptr<XxBuffer> newbuf2(
                      new XxBuffer( (*_files[0]),
                                    _files[0]->getName(),
                                    _files[0]->getDisplayName(),
                                    _files[0]->getFileInfo() )
                   );
-                  _files[2] = newbuf2;
+                  _files[2] = std::move(newbuf2);
                }
 
                // Do the diff.
@@ -3261,7 +3261,7 @@ void XxApp::saveOptions()
    {
       // Save to the stream the differences with the default resources.
       QTextStream outs( &outstr, QIODevice::WriteOnly );
-      std::auto_ptr<XxResources> defres(
+      std::unique_ptr<XxResources> defres(
          new XxResources( _cmdline._originalXdiff )
       );
       XxResParser::genInitFile( *_resources, *defres, outs );
@@ -4653,7 +4653,7 @@ void XxApp::cursorBottom()
 //
 bool XxApp::computeAbsoluteDifference() const
 {
-   const std::auto_ptr<XxBuffer>* buffers = getBuffers();
+   const std::unique_ptr<XxBuffer>* buffers = getBuffers();
    if ( _nbFiles == 2 ) {
       uint bs1;
       const char* b1 = buffers[0]->getBuffer( bs1 );

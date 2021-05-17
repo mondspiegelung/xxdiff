@@ -45,7 +45,7 @@ namespace {
 //
 int outputLine(
    QTextStream&                   os,
-   const std::auto_ptr<XxBuffer>* files,
+   const std::unique_ptr<XxBuffer>* files,
    const XxLine&                  line,
    int                            no
 )
@@ -854,7 +854,7 @@ uint XxDiffs::countRemainingUnselected() const
 bool XxDiffs::save(
    const XxResources&             resources,
    QTextStream&                   os,
-   const std::auto_ptr<XxBuffer>* files,
+   const std::unique_ptr<XxBuffer>* files,
    const bool                     useConditionals,
    const bool                     removeEmptyConditionals,
    const QString                  conditionals[3]
@@ -951,7 +951,7 @@ bool XxDiffs::save(
 //
 void XxDiffs::saveChunk(
    QTextStream&                   os,
-   const std::auto_ptr<XxBuffer>* files,
+   const std::unique_ptr<XxBuffer>* files,
    const bool                     useConditionals,
    const bool                     removeEmptyConditionals,
    const QString                  conditionals[3],
@@ -1002,7 +1002,7 @@ void XxDiffs::saveChunk(
 //
 bool XxDiffs::saveSelectedOnly(
    QTextStream&                   os,
-   const std::auto_ptr<XxBuffer>* files
+   const std::unique_ptr<XxBuffer>* files
 ) const
 {
    XX_ASSERT( files != 0 );
@@ -1047,7 +1047,7 @@ bool XxDiffs::saveSelectedOnly(
 void XxDiffs::search(
    const QString&                 searchText,
    const int                      nbFiles,
-   const std::auto_ptr<XxBuffer>* files
+   const std::unique_ptr<XxBuffer>* files
 )
 {
    XX_ASSERT( files != 0 );
@@ -1467,7 +1467,7 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
 //
 void XxDiffs::initializeHorizontalDiffs(
    const XxResources&             resources,
-   const std::auto_ptr<XxBuffer>* files,
+   const std::unique_ptr<XxBuffer>* files,
    const bool                     force
 )
 {
@@ -1742,9 +1742,9 @@ XxDln XxDiffs::getDisplayLine(
 //------------------------------------------------------------------------------
 //
 void XxDiffs::reindex(
-   const std::auto_ptr<XxBuffer>& file1,
-   const std::auto_ptr<XxBuffer>& file2,
-   const std::auto_ptr<XxBuffer>& file3
+   const std::unique_ptr<XxBuffer>& file1,
+   const std::unique_ptr<XxBuffer>& file2,
+   const std::unique_ptr<XxBuffer>& file3
 )
 {
    XxFno nbFiles = ( file3.get() == 0 ) ? 2 : 3;
@@ -1780,7 +1780,7 @@ void XxDiffs::reindex(
 //
 void XxDiffs::computeIgnoreDisplay(
    const int                      nbFiles,
-   const std::auto_ptr<XxBuffer>* files
+   const std::unique_ptr<XxBuffer>* files
 )
 {
    XxDln lineNo = 1;

@@ -409,7 +409,7 @@ XxBuilderFiles3::~XxBuilderFiles3()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
+std::unique_ptr<XxDiffs> XxBuilderFiles3::process(
    const QString&  command,
    const XxBuffer& buffer1,
    const XxBuffer& buffer2,
@@ -582,7 +582,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
       _status = 1;
    }
 
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
    return ap;
 }
 

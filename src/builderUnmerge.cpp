@@ -174,7 +174,7 @@ XxBuilderUnmerge::~XxBuilderUnmerge()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
+std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
    const XxBuffer&    buffer,
    const XxResources& resources,
    QString&           outFileLeft,
@@ -339,14 +339,14 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    XX_LOCAL_TRACE( "Left: " << outFileLeft );
    XX_LOCAL_TRACE( "Right: " << outFileRight );
 
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    
    return ap;
 }
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
+std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
    const XxBuffer&    buffer,
    const XxResources& resources,
    QString&           outFileLeft,
@@ -608,7 +608,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    outFileLeft = outFileLeft;
    outFileMiddle = outFileMiddle;
    outFileRight = outFileRight;
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    return ap;
 }
 

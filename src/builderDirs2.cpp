@@ -531,7 +531,7 @@ XxBuilderDirs2::~XxBuilderDirs2()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderDirs2::process( 
+std::unique_ptr<XxDiffs> XxBuilderDirs2::process( 
    const QString& command,
    XxBuffer&      buffer1,
    XxBuffer&      buffer2
@@ -694,7 +694,7 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
       throw XxIoError( XX_EXC_PARAMS );
    }
 
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, true ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines, true ) );
    return ap;
 }
 

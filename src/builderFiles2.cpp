@@ -232,7 +232,7 @@ XxBuilderFiles2::~XxBuilderFiles2()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
+std::unique_ptr<XxDiffs> XxBuilderFiles2::process(
    const QString&  command,
    const XxBuffer& buffer1,
    const XxBuffer& buffer2
@@ -272,7 +272,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    diffProc.waitForReadyRead();
    diffProc.setReadChannel( QProcess::StandardOutput );
 #else
-   std::auto_ptr<XxDiffutils> diffutils( new XxDiffutils );
+   std::unique_ptr<XxDiffutils> diffutils( new XxDiffutils );
    diffutils->diff( out_args );
 #endif
 
@@ -440,11 +440,11 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    }
 
 #ifdef XX_INTERNAL_DIFFS
-   std::auto_ptr<XxDiffutils> null( 0 );
+   std::unique_ptr<XxDiffutils> null( 0 );
    diffutils = null;
 #endif
 
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
    return ap;
 }
 
